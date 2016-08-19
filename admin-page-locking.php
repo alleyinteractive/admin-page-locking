@@ -45,3 +45,16 @@ require_once( PATH . '/lib/autoload.php' );
 
 // Singleton trait
 require_once( PATH . '/lib/trait-singleton.php' );
+
+add_action( 'after_setup_theme', function() {
+	/**
+	 * Filter the screens that should be setup to be "locked".
+	 *
+	 * @param array $screens Array of screens (pagenames/hook suffixes) on which
+	 *                       to enable locking.
+	 */
+	$screens = apply_filters( 'admin_page_locking_screens', [] );
+	foreach ( $screens as $screen ) {
+		new \Admin_Page_Locking\Screen( $screen );
+	}
+} );
