@@ -103,7 +103,7 @@ class Screen {
 
 
 	public function lock( $user_id = 0 ) {
-		if( ! $user_id ) {
+		if ( ! $user_id ) {
 			$user = wp_get_current_user();
 			$user_id = $user->ID;
 		}
