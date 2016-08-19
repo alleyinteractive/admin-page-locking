@@ -3,7 +3,7 @@
  * Plugin Name:     Admin Page Locking
  * Plugin URI:      https://github.com/alleyinteractive/admin-page-locking/
  * Description:     Ensure that only one person is editing a given settings screen in the admin.
- * Author:          Matthew Boynes
+ * Author:          Matthew Boynes, Alley Interactive, Penske Media Corporation
  * Author URI:      https://www.alleyinteractive.com
  * Text Domain:     admin-page-locking
  * Domain Path:     /languages
@@ -14,7 +14,7 @@
  */
 /*
 	Copyright 2010-2015 Mohammad Jangda, Automattic
-	Copyright 2016 Alley Interactive
+	Copyright 2016 Alley Interactive, Penske Media Corporation
 
 	The following code is a derivative work of code from the Automattic plugin
 	Zoninator, which is licensed GPLv2. This code therefore is also licensed

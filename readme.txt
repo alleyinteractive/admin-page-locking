@@ -1,5 +1,5 @@
 === Admin Page Locking ===
-Contributors: mboynes
+Contributors: mboynes, pmcdotcom
 Tags: settings, locking, multiple editors
 Requires at least: 4.5
 Tested up to: 4.6
