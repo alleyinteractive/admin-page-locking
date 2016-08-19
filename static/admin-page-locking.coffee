@@ -1,4 +1,10 @@
 (($) ->
+
+	# 1. Every adminPageLockingData.lockPeriod seconds, update the lock
+	# 2. After adminPageLockingData.lockPeriodMax seconds, ask the user if they need more time
+	#     a. After adminPageLockingData.lockPeriod seconds of no response, kill it
+	#     b. If user requests more time, refresh adminPageLockingData.lockPeriodMax
+	# 3. If the screen is loaded and in use, submit a notice and redirect to dashboard
 	class AdminPageLocking
 		constructor: ->
 			@currentTime = 0
@@ -48,9 +54,8 @@
 		#       want more time, they wouldn't get it -- that's a crumy UX. However,
 		#       the modal box won't pull attention to this window/tab like a
 		#       confirm dialog would, so it's possible that someone would miss the
-		#       message even though they do need more time. Need to make a
-		#       decision on that.
-		#
+		#       message even though they do need more time. If this becomes a
+		#       problem, consider using a confirm() dialog.
 		askForMoreTime: ->
 			promptTimer = setTimeout =>
 				alert adminPageLockingData.errorLockMax
@@ -91,16 +96,6 @@
 		exitScreen: ->
 			location.href = adminPageLockingData.adminUrl
 
-		modalAlert: (message) ->
-			if tb_show?
-				unless $( '#apl-message-content' ).length
-					$( 'body' ).append '<div id="apl-message" style="display:none;"><p id="apl-message-content"></p></div>'
-
-				$( '#apl-message-content' ).text message
-				tb_show null, '#TB_inline?inlineId=apl-message&width=300&height=200', false
-			else
-				alert message
-
 		modalConfirm: (message) ->
 			if tb_show?
 				unless $( '#apl-message-content' ).length
@@ -108,7 +103,7 @@
 						'<div id="apl-message" style="display:none;">' +
 							'<p id="apl-message-content"></p>' +
 							'<p><a class="button-primary apl-confirm-button" data-confirm="yes">Yes</a>' +
-							'<a class="button-secondary apl-confirm-button" data-confirm="no">No</a></p>' +
+							'&nbsp;<a class="button-secondary apl-confirm-button" data-confirm="no">No</a></p>' +
 						'</div>'
 					)
 

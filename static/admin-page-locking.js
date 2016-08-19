@@ -98,22 +98,10 @@
         return location.href = adminPageLockingData.adminUrl;
       };
 
-      AdminPageLocking.prototype.modalAlert = function(message) {
-        if (typeof tb_show !== "undefined" && tb_show !== null) {
-          if (!$('#apl-message-content').length) {
-            $('body').append('<div id="apl-message" style="display:none;"><p id="apl-message-content"></p></div>');
-          }
-          $('#apl-message-content').text(message);
-          return tb_show(null, '#TB_inline?inlineId=apl-message&width=300&height=200', false);
-        } else {
-          return alert(message);
-        }
-      };
-
       AdminPageLocking.prototype.modalConfirm = function(message) {
         if (typeof tb_show !== "undefined" && tb_show !== null) {
           if (!$('#apl-message-content').length) {
-            $('body').append('<div id="apl-message" style="display:none;">' + '<p id="apl-message-content"></p>' + '<p><a class="button-primary apl-confirm-button" data-confirm="yes">Yes</a>' + '<a class="button-secondary apl-confirm-button" data-confirm="no">No</a></p>' + '</div>');
+            $('body').append('<div id="apl-message" style="display:none;">' + '<p id="apl-message-content"></p>' + '<p><a class="button-primary apl-confirm-button" data-confirm="yes">Yes</a>' + '&nbsp;<a class="button-secondary apl-confirm-button" data-confirm="no">No</a></p>' + '</div>');
           }
           $('#apl-message-content').text(message);
           tb_show(null, '#TB_inline?inlineId=apl-message&width=300&height=200', false);
