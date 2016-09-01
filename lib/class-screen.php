@@ -82,12 +82,6 @@ class Screen {
 			wp_send_json_error( [ 'message' => $this->messages['nonce'] ] );
 		}
 
-		$locked = $this->is_locked();
-		if ( $locked ) {
-			$locking_user = get_userdata( $locked );
-			wp_send_json_error( [ 'message' => sprintf( $this->messages['error-lock'], $locking_user->display_name ) ] );
-		}
-
 		$this->lock();
 		wp_send_json_success();
 	}
@@ -103,13 +97,13 @@ class Screen {
 
 
 	public function lock( $user_id = 0 ) {
-		if ( ! $user_id ) {
+		if( ! $user_id ) {
 			$user = wp_get_current_user();
 			$user_id = $user->ID;
 		}
 
-		// Add 3 seconds to avoid most race condition issues between lock expiry and ajax call
-		$expiry = $this->lock_period + 3;
+		// Add a one to avoid most race condition issues between lock expiry and ajax call
+		$expiry = $this->lock_period + 1;
 		set_transient( $this->get_lock_key(), $user->ID, $expiry );
 	}
 
@@ -139,14 +133,100 @@ class Screen {
 			if ( $locked ) :
 				$locking_user = get_userdata( $locked );
 				?>
-				<div class="updated error" id="apl-lock-error">
+				<div class="updated inline error">
 					<p>
-						<?php echo esc_html( sprintf( $this->messages['error-lock'], $locking_user->display_name ) ); ?>
+						<?php
+						printf(
+							esc_html( $this->messages['error-lock'] ),
+							sprintf( '<a href="%s">%s</a>', esc_url( 'mailto:' . $locking_user->user_email ), esc_html( $locking_user->display_name ) )
+						);
+						?>
 					</p>
 				</div>
 				<input type="hidden" id="apl-user" name="apl-user" value="1" />
 				<?php
 			endif;
 		endif;
+	}
+
+	/**
+	 * Outputs the HTML for the notice to say that someone else is editing or has
+	 * taken over editing of this screen.
+	 *
+	 * The following code has been reused and modified from WordPress.org, and is
+	 * released under GPLv2. Copyright 2011-2016 WordPress.org.
+	 */
+	function _admin_notice_post_locked() {
+		$user = null;
+		if ( $user_id = $this->is_locked( $post->ID ) ) {
+			$user = get_userdata( $user_id );
+		}
+
+		$locked = (bool) $user_id;
+
+		$sendback = admin_url();
+		$hidden = $locked ? '' : ' hidden';
+
+		?>
+		<div id="post-lock-dialog" class="notification-dialog-wrap<?php echo $hidden; ?>">
+			<div class="notification-dialog-background"></div>
+			<div class="notification-dialog">
+				<?php
+				if ( $locked ) {
+					/**
+					 * Filter whether to allow the post lock to be overridden.
+					 *
+					 * Returning a falsey value to the filter will disable the ability
+					 * to override the post lock.
+					 *
+					 * @param bool $override Whether to allow overriding post locks. Default true.
+					 * @param string $page The current page.
+					 * @param WP_User $user User object.
+					 */
+					$override = apply_filters( 'override_post_lock', true, $this->page, $user );
+					$tab_last = $override ? '' : ' wp-tab-last';
+					?>
+					<div class="post-locked-message">
+						<div class="post-locked-avatar"><?php echo get_avatar( $user->ID, 64 ); ?></div>
+						<p class="currently-editing wp-tab-first" tabindex="0">
+							<?php
+							esc_html_e( 'This content is currently locked.', 'admin-page-locking' );
+							if ( $override ) {
+								printf( ' ' . esc_html__( 'If you take over, %s will be blocked from continuing to edit and their changes may be lost.', 'admin-page-locking' ), esc_html( $user->display_name ) );
+							}
+							?>
+						</p>
+						<p>
+							<a class="button" href="<?php echo esc_url( $sendback ); ?>"><?php echo esc_html( $sendback_text ); ?></a>
+
+							<?php
+							// Allow plugins to prevent some users overriding the post lock
+							if ( $override ) :
+								$override_uri = wp_nonce_url( add_query_arg( 'take-over', 1 ), 'lock-page-' . $this->page ) )
+								?>
+								<a class="button button-primary wp-tab-last" href="<?php echo esc_url( $override_uri ); ?>"><?php esc_html_e( 'Take over', 'admin-page-locking' ); ?></a>
+								<?php
+							endif;
+							?>
+						</p>
+					</div>
+					<?php
+				} else {
+					?>
+					<div class="post-taken-over">
+						<div class="post-locked-avatar"></div>
+						<p class="wp-tab-first" tabindex="0">
+							<span class="currently-editing"></span><br />
+							<span class="locked-saving hidden"><img src="<?php echo esc_url( admin_url( 'images/spinner-2x.gif' ) ); ?>" width="16" height="16" alt="" /> <?php _e( 'Saving revision&hellip;' ); ?></span>
+							<span class="locked-saved hidden"><?php _e('Your latest changes were saved as a revision.'); ?></span>
+						</p>
+						<p><a class="button button-primary wp-tab-last" href="<?php echo esc_url( $sendback ); ?>"><?php echo esc_html( $sendback_text ); ?></a></p>
+					</div>
+					<?php
+				}
+				?>
+			</div>
+		</div>
+		<?php
 	}
 }
