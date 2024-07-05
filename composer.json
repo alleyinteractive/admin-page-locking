@@ -1,5 +1,6 @@
 {
   "name": "alleyinteractive/admin-page-locking",
+  "type": "wordpress-plugin",
   "authors": [
     {
       "name": "Matthew Boynes",
